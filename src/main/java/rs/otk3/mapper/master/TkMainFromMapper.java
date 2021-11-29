@@ -18,6 +18,8 @@ public interface TkMainFromMapper {
 
     List<TkMainFromVO>  getTkinfoByno(@Param("no") String no);
 
+//    List<TkMainFromVO>  getTkinfoBynoandnoother(@Param("no") String no);
+
     List<TkMainFromVO> getTkinfolist();
 
     void  upTkmaininfolist(@Param("list")List<String> ids);

@@ -4,11 +4,14 @@ package rs.otk3.server.impl;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.otk3.bean.K3InfoVO;
 import rs.otk3.bean.TkMainFromVO;
 import rs.otk3.bean.TkSonFromVO;
+import rs.otk3.controller.A8tkTestController;
 import rs.otk3.mapper.master.TkMainFromMapper;
 import rs.otk3.mapper.master.TkSonFromMapper;
 import rs.otk3.mapper.second.K3MainFromMapper;
@@ -19,6 +22,8 @@ import java.util.*;
 
 @Service
 public class A8tkServerImpl implements A8tkServer {
+
+    private static final Logger logger = LoggerFactory.getLogger(A8tkServerImpl.class);
 
 
     @Autowired
@@ -71,44 +76,88 @@ public class A8tkServerImpl implements A8tkServer {
     @Override
     public String upTkinfoByno(String no) {
 
-        //查询出需要处理的单据
-        List<TkMainFromVO> lis = tkmainFromDAO.getTkinfoByno(no);
+        logger.info("执行手动指定更新开始===>同步中间表k3数据到OA退库表中");
+        //查询所有符合条件的数据
+        List<TkMainFromVO> lis = null;
+        try {
+            lis = tkmainFromDAO.getTkinfoByno(no);
+            logger.info("查询需要处理的数据长度===>" + lis.size());
+        } catch (Exception e) {
+            logger.error("查询A8需要处理的数据出现错误===>" + e);
+            throw e;
+        }
         Vector<TkSonFromVO> sonVec = new Vector<TkSonFromVO>();
         Vector<String> fidVec = new Vector<String>();
         //符合条件的数据去查询子表
         for (TkMainFromVO fvo : lis) {
-            List<K3InfoVO> k3list = k3FromDAO.getK3infoByno(fvo.getOrderno());
+            logger.info("需要处理的数据===>" + fvo.getOrderno());
+            List<K3InfoVO> k3list = null;
+            try {
+                k3list = k3FromDAO.getK3infoByno(fvo.getOrderno());
+                logger.info("对应处理的数据长度===>" + k3list.size());
+            } catch (Exception e) {
+                logger.error("查询K3需要处理的数据出现错误===>" + e);
+                throw e;
+            }
             int sort = 1;
             for (K3InfoVO k3vo : k3list) {
-                TkSonFromVO sonvo = exChange(k3vo, sort, fvo.getId());
+                logger.info("需要交换a8的数据===>" + k3vo.getK3orderno());
+                TkSonFromVO sonvo = null;
+                try {
+                    sonvo = exChange(k3vo, sort, fvo.getId());
+                    logger.info("需要交换k3的数据===>" + sonvo.getK3orderno());
+                } catch (Exception e) {
+                    logger.error("交换处理的数据出现错误===>" + e);
+                    throw e;
+                }
                 sonVec.add(sonvo);
                 if (!fidVec.contains(fvo.getId())) {
                     fidVec.add(fvo.getId());
                 }
                 sort++;
             }
+
         }
-        if (!sonVec.isEmpty()) {
+        if (!fidVec.isEmpty()) {
             List<String> fidlist = Collections.list(fidVec.elements());
-            tksonFromDAO.deleteTksoninfobyfid(fidlist);
+            try {
+                tksonFromDAO.deleteTksoninfobyfid(fidlist);
+                logger.info("删除a8子表数据成功");
+            } catch (Exception e) {
+                logger.error("删除a8子表数据失败" + e);
+                throw e;
+            }
             Integer num = 100;
             Integer size = sonVec.size();
             Integer length = size / num + 1;
 
             for (int xx = 0; xx < length; xx++) {
                 Vector vec = new Vector();
-                for (int yy = 0; yy <num && (yy + xx * num) < size - 1; yy++) {
+                for (int yy = 0; yy < num && (yy + xx * num) < size - 1; yy++) {
                     vec.add(sonVec.get(yy + xx * num));
                 }
                 List<TkSonFromVO> list = Collections.list(vec.elements());
-                tksonFromDAO.insertTksoninfolist(list);
+                try {
+                    tksonFromDAO.insertTksoninfolist(list);
+                    logger.info("插入a8子表数据成功");
+                } catch (Exception e) {
+                    logger.error("插入a8子表数据失败" + e);
+                    throw e;
+                }
+
+
             }
-            tkmainFromDAO.upTkmaininfolist(fidlist);
+            try {
+                tkmainFromDAO.upTkmaininfolist(fidlist);
+                logger.info("更新a8主表回写数据成功");
+            } catch (Exception e) {
+                logger.error("更新a8主表回写数据失败" + e);
+                throw e;
+            }
 
         }
-
-        return lis.isEmpty() + "";
-
+        logger.info("执行手动指定更新结束===>同步中间表k3数据到OA退库表中");
+        return "成功";
     }
 
     public TkSonFromVO exChange(K3InfoVO k3vo, int sort, String fid) {
@@ -139,27 +188,58 @@ public class A8tkServerImpl implements A8tkServer {
     @Override
     public String upTkinfoall() {
 
+        logger.info("执行手动全部更新开始===>同步中间表k3数据到OA退库表中");
         //查询所有符合条件的数据
-        List<TkMainFromVO> lis = tkmainFromDAO.getTkinfolist();
-
+        List<TkMainFromVO> lis = null;
+        try {
+            lis = tkmainFromDAO.getTkinfolist();
+            logger.info("查询需要处理的数据长度===>" + lis.size());
+        } catch (Exception e) {
+            logger.error("查询A8需要处理的数据出现错误===>" + e);
+            throw e;
+        }
         Vector<TkSonFromVO> sonVec = new Vector<TkSonFromVO>();
         Vector<String> fidVec = new Vector<String>();
         //符合条件的数据去查询子表
         for (TkMainFromVO fvo : lis) {
-            List<K3InfoVO> k3list = k3FromDAO.getK3infoByno(fvo.getOrderno());
+            logger.info("需要处理的数据===>" + fvo.getOrderno());
+            List<K3InfoVO> k3list = null;
+            try {
+                k3list = k3FromDAO.getK3infoByno(fvo.getOrderno());
+                logger.info("对应处理的数据长度===>" + k3list.size());
+            } catch (Exception e) {
+                logger.error("查询K3需要处理的数据出现错误===>" + e);
+                throw e;
+            }
             int sort = 1;
             for (K3InfoVO k3vo : k3list) {
-                TkSonFromVO sonvo = exChange(k3vo, sort, fvo.getId());
+                logger.info("需要交换a8的数据===>" + k3vo.getK3orderno());
+
+                TkSonFromVO sonvo = null;
+                try {
+                    sonvo = exChange(k3vo, sort, fvo.getId());
+                    logger.info("需要交换k3的数据===>" + sonvo.getK3orderno());
+                } catch (Exception e) {
+                    logger.error("交换处理的数据出现错误===>" + e);
+                    throw e;
+                }
                 sonVec.add(sonvo);
                 if (!fidVec.contains(fvo.getId())) {
                     fidVec.add(fvo.getId());
                 }
                 sort++;
             }
+
         }
         if (!fidVec.isEmpty()) {
             List<String> fidlist = Collections.list(fidVec.elements());
-            tksonFromDAO.deleteTksoninfobyfid(fidlist);
+            try {
+                tksonFromDAO.deleteTksoninfobyfid(fidlist);
+                logger.info("删除a8子表数据成功");
+            } catch (Exception e) {
+                logger.error("删除a8子表数据失败" + e);
+                throw e;
+            }
             Integer num = 100;
             Integer size = sonVec.size();
             Integer length = size / num + 1;
@@ -170,13 +250,27 @@ public class A8tkServerImpl implements A8tkServer {
                     vec.add(sonVec.get(yy + xx * num));
                 }
                 List<TkSonFromVO> list = Collections.list(vec.elements());
-                tksonFromDAO.insertTksoninfolist(list);
+                try {
+                    tksonFromDAO.insertTksoninfolist(list);
+                    logger.info("插入a8子表数据成功");
+                } catch (Exception e) {
+                    logger.error("插入a8子表数据失败" + e);
+                    throw e;
+                }
+
+
             }
-            tkmainFromDAO.upTkmaininfolist(fidlist);
+            try {
+                tkmainFromDAO.upTkmaininfolist(fidlist);
+                logger.info("更新a8主表回写数据成功");
+            } catch (Exception e) {
+                logger.error("更新a8主表回写数据失败" + e);
+                throw e;
+            }
 
         }
-
-        return "null";
+        logger.info("执行手动全部更新结束===>同步中间表k3数据到OA退库表中");
+        return "成功";
     }
 
 

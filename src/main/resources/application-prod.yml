@@ -1,4 +1,3 @@
-
 master:
   datasource:
     username: sa
@@ -11,4 +10,10 @@ second:
     password: 123qwe!@#QWE
     url: jdbc:sqlserver://172.16.0.166:1433;DatabaseName=ITSource
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    rs.tk3.server: trace
+    com.zoctan.api.mapper: debug
 
