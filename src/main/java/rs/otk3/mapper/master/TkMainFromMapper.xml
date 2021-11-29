@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rs.otk3.mapper.master.TkMainFromMapper">
+
+    <select id="getTkinfoByno" resultType="rs.otk3.bean.TkMainFromVO">
+
+        select field0004                                 orderno,
+               isnull(field0053, '-3922189722746141359') bispr,
+               isnull(field0054, '-3922189722746141359') bisfinal,
+               ID                                        id
+        from formmain_0207
+        where field0004 = #{no}
+
+    </select>
+
+    <select id="getTkinfolist" resultType="rs.otk3.bean.TkMainFromVO">
+        select  field0004 orderno,
+        isnull(field0055, '-3922189722746141359') bispr,
+        isnull(field0056, '-3922189722746141359') bisfinal,
+        ID id
+        from formmain_0207
+        where
+        isnull(field0055, '-3922189722746141359') = '-2157629912195445911'
+        and
+         isnull(field0056, '-3922189722746141359') = '-3922189722746141359'
+       --  and field0004  &lt;&gt; 'BJZIN079952'
+    </select>
+
+    <update id="upTkmaininfolist" parameterType="java.util.List">
+        <foreach collection="list" separator=";" item="item">
+            update formmain_0207 set field0056 ='-2157629912195445911' where ID=#{item}
+        </foreach>
+    </update>
+</mapper>

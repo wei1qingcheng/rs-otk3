@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rs.otk3.mapper.master.TkSonFromMapper">
+
+
+    <delete id="deleteTksoninfobyfid" parameterType="java.util.List">
+
+        <foreach collection="list" separator=";" item="item">
+            delete from formson_9545 where formmain_id = #{item}
+        </foreach>
+
+    </delete>
+
+
+    <insert id="insertTksoninfolist" parameterType="java.util.List">
+
+        <foreach collection="list" separator=";" item="item">
+            INSERT INTO formson_9545
+            (ID,formmain_id,sort,field0057,field0058,field0059,field0060,
+            field0061,field0062,field0063,field0064,field0065,field0066,field0067,field0068,field0069)
+            VALUES
+            (#{item.ID},#{item.formmain_id},#{item.sort},#{item.no},#{item.fdate},#{item.k3orderno},
+            #{item.a8orderno},#{item.k3mano},#{item.k3maname}, #{item.k3ggxh}, #{item.k3dw},#{item.k3ph},
+            #{item.k3manum}, #{item.memo}, #{item.k3reason}, #{item.k3outtype} )
+        </foreach>
+    </insert>
+
+
+</mapper>

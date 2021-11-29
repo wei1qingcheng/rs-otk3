@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rs.otk3.mapper.second.K3MainFromMapper">
+
+    <select id="getK3infoByno" resultType="rs.otk3.bean.K3InfoVO">
+        select FDate      fdate,
+               FBillNo    k3orderno,
+               FZINBillNo a8orderno,
+               FNumber    k3mano,
+               FName      k3maname,
+               FModel     k3ggxh,
+               FUnit      k3dw,
+               FBatchNo   k3ph,
+               FQty       k3manum,
+               FNote      memo,
+               FReview    k3reason,
+               FReason    k3outtype
+        from K3_ICStockBill
+        where FZINBillNo = #{no};
+    </select>
+
+</mapper>

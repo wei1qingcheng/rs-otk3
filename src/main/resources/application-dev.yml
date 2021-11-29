@@ -1,0 +1,14 @@
+
+master:
+  datasource:
+    username: sa
+    password: raisecom@123
+    url: jdbc:sqlserver://172.16.0.237:1433;DatabaseName=V80
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+second:
+  datasource:
+    username: sa
+    password: 123qwe!@#QWE
+    url: jdbc:sqlserver://172.16.0.166:1433;DatabaseName=ITSource
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
